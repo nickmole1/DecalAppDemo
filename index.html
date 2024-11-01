@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decal Detection Demo</title>
+</head>
+<body>
+    <h1>Upload Vehicle Image</h1>
+    <input type="file" id="imageUpload" accept="image/*">
+    <button onclick="uploadImage()">Process Image</button>
+
+    <h2>Detected Decal</h2>
+    <img id="resultImage" alt="Cropped Decal Image" style="display: none;">
+
+    <script>
+        async function uploadImage() {
+            const fileInput = document.getElementById('imageUpload');
+            if (fileInput.files.length === 0) {
+                alert('Please select an image to upload.');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('https://dotdecalappdemocv.cognitiveservices.azure.com/', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                if (result && result.croppedImage) {
+                    const resultImage = document.getElementById('resultImage');
+                    resultImage.src = "data:image/jpeg;base64," + result.croppedImage;
+                    resultImage.style.display = 'block';
+                } else {
+                    alert('Decal not detected.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('There was an error processing the image.');
+            }
+        }
+    </script>
+</body>
+</html>
